@@ -114,5 +114,8 @@
   <ItemGroup>
     <Resource Include="MediaDevicesLicense.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="LICENSE.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
