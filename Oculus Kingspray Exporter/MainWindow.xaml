@@ -1,0 +1,35 @@
+﻿<Window x:Class="Oculus_Kingspray_Exporter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Oculus_Kingspray_Exporter"
+        mc:Ignorable="d"
+        Title="Oculus Quest Kingspray Exporter" Height="900" Width="1200" Background="#FFBBB1B1">
+    <Grid Margin="10,10,21,20">
+        <Button Content="Click to convert" HorizontalAlignment="Left" Margin="563,150,0,0" VerticalAlignment="Top" Width="149" Click="Button_Click" Height="44"/>
+        <Image x:Name="imgKing" HorizontalAlignment="Left" Height="640" Margin="531,199,-10,0" VerticalAlignment="Top" Width="640"/>
+        <ListBox x:Name="lbThumbnails" HorizontalAlignment="Left" Height="819" VerticalAlignment="Top" Width="521" Margin="10,10,0,0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="180" Width="514">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition MinWidth="320"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Image HorizontalAlignment="Left" Height="180" VerticalAlignment="Top" Width="320" Source="{Binding Thumbnail}"/>
+                        <StackPanel HorizontalAlignment="Left" Height="180" VerticalAlignment="Top" Grid.Column="1" Width="217" Margin="0,0,-117,0">
+                            <TextBlock Text="{Binding SaveLocation}"/>
+                            <TextBlock Text="{Binding SaveDateTime}"/>
+                            <TextBlock x:Name="SavePath"  Text="{Binding SavePath}" Visibility="Hidden"/>
+
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+
+
+    </Grid>
+</Window>

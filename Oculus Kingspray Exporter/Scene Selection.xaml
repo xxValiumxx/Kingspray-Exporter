@@ -1,0 +1,33 @@
+﻿<Window x:Class="Oculus_Kingspray_Exporter.Scene_Selection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Oculus_Kingspray_Exporter"
+        mc:Ignorable="d"
+        Title="What scene is this from?" Height="261.65" Width="335.275">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Content="Rooftops" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46"/>
+        <Button Content="Top Dog Auto Repair" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="1"/>
+        <Button Content="Subway" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="2"/>
+        <Button Content="Underpass" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="3"/>
+        <Button Content="Bullship Depot" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="4"/>
+        <Button Content="Bullship Storage" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="0" Grid.Column="1"/>
+        <Button Content="Top Dog Garage" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="1" Grid.Column="1"/>
+        <Button Content="Cinema" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="2" Grid.Column="1"/>
+        <Button Content="Spraycan" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="3" Grid.Column="1"/>
+        <Button Content="Baseball Cap" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="4" Grid.Column="1"/>
+
+    </Grid>
+</Window>
