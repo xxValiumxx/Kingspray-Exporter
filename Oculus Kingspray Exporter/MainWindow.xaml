@@ -28,6 +28,7 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <Button Content="Click to Import" HorizontalAlignment="Left" Margin="1022,150,0,0" VerticalAlignment="Top" Width="129" Height="44" Click="Button_Click_1"/>
 
 
 

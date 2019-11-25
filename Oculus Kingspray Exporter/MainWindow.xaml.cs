@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,56 +33,67 @@ namespace Oculus_Kingspray_Exporter
         public MainWindow()
         {
             InitializeComponent();
-            devices = MediaDevice.GetDevices();
+            
+            
             try
             {
 
-             
-            using (var device = devices.First(d => d.Description == "Quest"))
-            {
-                device.Connect();
-                var directories = device.GetDirectories(@"\Internal shared storage\Android\data\com.infectiousape.kingspray\files");
+             devices = MediaDevice.GetDevices();
+                
+                using (var device = devices.First(d => d.Description == "Quest"))
+                {
+                    
+                    device.Connect();
+ 
+                    bool hasKingspray = device.DirectoryExists(@"\Internal shared storage\Android\data\com.infectiousape.kingspray\files");
+                    Console.Write("Device has Kingspray:");
+                    Console.Write(hasKingspray);
+                    Console.Write("Fetching thumbnails...");
 
-                bool hasKingspray = device.DirectoryExists(@"\Internal shared storage\Android\data\com.infectiousape.kingspray\files");
-                Console.Write("Device has Kingspray:");
-                Console.Write(hasKingspray);
-                Console.Write("Fetching thumbnails...");
-                List<string> saves = new List<string>();
-                foreach (string d in directories)
-                {
-                    if (!d.Contains(@"Unity"))
+                    var directories = device.GetDirectories(@"\Internal shared storage\Android\data\com.infectiousape.kingspray\files");
+                    List<string> saves = new List<string>();
+                    foreach (string d in directories)
                     {
-                        saves.AddRange(device.GetDirectories(d));
+                        if (!d.Contains(@"Unity"))
+                        {
+                            saves.AddRange(device.GetDirectories(d));
+                        }
                     }
-                }
-                saveItems = new List<SaveItem>();
-                foreach (string save in saves)
-                {
-                    MemoryStream ms = new MemoryStream(65565);
-                    string thumbpath = save + @"\Thumbnail.jpg";
-                    device.DownloadFile(thumbpath, ms);
-                    ms.Position = 0;
-                    BitmapImage thumb = new BitmapImage();
-                    thumb.BeginInit();
-                    thumb.StreamSource = ms;
-                    thumb.EndInit();
-                    saveItems.Add(new SaveItem()
+                    saveItems = new List<SaveItem>();
+                    foreach (string save in saves)
                     {
-                        SavePath = save,
-                        SaveLocation = save.Split('\\')[6],
-                        SaveDateTime = save.Substring(save.LastIndexOf(@"\")).TrimStart('\\'),
-                        Thumbnail = thumb
-                    });
+                        MemoryStream ms = new MemoryStream(65565);
+                        string thumbpath = save + @"\Thumbnail.jpg";
+                        if (device.FileExists(thumbpath))
+                        {
+                            device.DownloadFile(thumbpath, ms);
+                            ms.Position = 0;
+                            BitmapImage thumb = new BitmapImage();
+                            thumb.BeginInit();
+                            thumb.StreamSource = ms;
+                            thumb.EndInit();
+                            saveItems.Add(new SaveItem()
+                            {
+                                SavePath = save,
+                                SaveLocation = save.Split('\\')[6],
+                                SaveDateTime = save.Substring(save.LastIndexOf(@"\")).TrimStart('\\'),
+                                Thumbnail = thumb
+                            });
+                        }
+                        else { Console.Write("Missing thumbnail in " + thumbpath); }
+                    }
+                    lbThumbnails.ItemsSource = saveItems;
+                    device.Disconnect();
+                    /**/
                 }
-                lbThumbnails.ItemsSource = saveItems;
-                device.Disconnect();
-            }
+                
             }
             catch (Exception)
             {
                 MessageBox.Show(@"There was an Error.  Please make sure your Quest is connected, you have Kingspray installed, and that you have granted file access permission on the quest.");
                 Close();
             }
+            
         }
         Bitmap paintImage;
         Bitmap metalImage;
@@ -278,6 +290,244 @@ namespace Oculus_Kingspray_Exporter
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream stream = assembly.GetManifestResourceStream("Oculus_Kingspray_Exporter.Template.jpg");
+            MemoryStream thumbnailStream = new MemoryStream((int)stream.Length);
+            stream.CopyTo(thumbnailStream);
+            Bitmap thumbnailOverlay = new Bitmap(stream);
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = @"PNG Image | *.png";
+            ofd.ShowDialog();
+            if(ofd.FileName != "")
+            {
+                try
+                {
+                    Bitmap importFile = new Bitmap(ofd.FileName);
+                    imgKing.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                        importFile.GetHbitmap(),
+                        IntPtr.Zero,
+                        System.Windows.Int32Rect.Empty,
+                        BitmapSizeOptions.FromWidthAndHeight(importFile.Width, importFile.Height)
+                    );
+                    if (!Bitmap.IsCanonicalPixelFormat(System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                        throw new Exception(@"Wrong Pixel Format");
+                    //Check Image Dimensions to get valid import targets
+                    /*
+                    0x1 Rooftops 4096*2048
+                    0x2 Top Dog Auto Repair  4096*2048
+                    0x4 Underpass 4096*2048
+                    0x8 Top Dog Garage 8192*1024
+                    0x10 Bullship Depot 2048*1024
+                    0x20 Bullship Storage 8192*1024
+                    0x40 Subway 8192*1024
+                    0x80 Cinema 4096*512
+                    0x100 Spraycan 1024*1024
+                    0x200 Baseball Cap 1024*512
+                    0x400 bunker 2048*2048
+                     */
+                    bool isValidImport = true;
+                    bool isGarage = false;
+                    UInt16 locationMask = 0x0;
+                    Scene_Selection dialog = new Scene_Selection();
+                    
+                    switch (importFile.Width)
+                    {
+                        case 4096:
+                            switch (importFile.Height)
+                            {
+                                case 2048:
+                                    //Rooftops, autorepair, underpass
+                                    locationMask &= 0x7;
+                                    dialog.btnAutoRepair.IsEnabled = true;
+                                    dialog.btnRoof.IsEnabled = true;
+                                    dialog.btnUnderpass.IsEnabled = true;
+                                    break;
+                                case 512:
+                                    //cinema
+                                    locationMask &= 0x80;
+                                    dialog.btnCinema.IsEnabled = true;
+                                    break;
+                                default:
+                                    //invalid
+                                    isValidImport = false;
+                                    break;
+                            }
+                            break;
+                        case 8192:
+                            switch (importFile.Height)
+                            {
+                                case 1024:
+                                    //garage, storage, subway
+                                    locationMask &= 0x68;
+                                    dialog.btnGarage.IsEnabled = true;
+                                    dialog.btnStorage.IsEnabled = true;
+                                    dialog.btnSubway.IsEnabled = true;
+                                    break;
+                                default:
+                                    //invalid
+                                    isValidImport = false;
+                                    break;
+                            }
+                            break;
+                        case 2048:
+                            switch (importFile.Height)
+                            {
+                                case 1024:
+                                    //depot
+                                    locationMask &= 0x10;
+                                    dialog.btnDepot.IsEnabled = true;
+                                    break;
+                                case 2048:
+                                    //bunker
+                                    locationMask &= 0x400;
+                                    dialog.btnBunker.IsEnabled = true;
+                                    break;
+                                default:
+                                    //invalid
+                                    isValidImport = false;
+                                    break;
+                            }
+                            break;
+                        case 1024:
+                            switch (importFile.Height)
+                            {
+                                case 1024:
+                                    //Spraycan
+                                    locationMask &= 0x100;
+                                    dialog.btnSpraycan.IsEnabled = true;
+                                    break;
+                                case 512:
+                                    //ballcap
+                                    locationMask &= 0x200;
+                                    dialog.btnBaseballCap.IsEnabled = true;
+                                    break;
+                                default:
+                                    //invalid
+                                    isValidImport = false;
+                                    break;
+                            }
+                            break;
+                        default:
+                            //invalid
+                            isValidImport = false;
+                            break;
+                    }
+                    if(isValidImport)
+                    {
+                        byte[] paintBuffer = new byte[importFile.Width * importFile.Height * 4];
+                        byte[] maskBuffer = new byte[importFile.Width * importFile.Height * 3];
+                        MemoryStream paintData = new MemoryStream(paintBuffer,0,paintBuffer.Length, true, true);
+                        MemoryStream maskData = new MemoryStream(maskBuffer,0,maskBuffer.Length, true, true);
+
+                        //flip image along Y
+                        importFile.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        if (isGarage)
+                            importFile.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                        System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, importFile.Width, importFile.Height);
+                        importFile.MakeTransparent(System.Drawing.Color.FromArgb(0, 255, 255, 255));
+                        BitmapData bitmapData = importFile.LockBits(rect, ImageLockMode.ReadWrite, importFile.PixelFormat);
+                        IntPtr ptr = bitmapData.Scan0;
+                        int bytes = Math.Abs(bitmapData.Stride) * importFile.Height;
+                        System.Runtime.InteropServices.Marshal.Copy(ptr, paintData.GetBuffer(), 0, bytes);
+                        importFile.UnlockBits(bitmapData);
+
+                        //MANGLE IT
+                        for (int i = 0; i < paintData.Length; i += 4)
+                        {
+                            byte B = paintData.GetBuffer()[i];
+                            byte G = paintData.GetBuffer()[i + 1];
+                            byte R = paintData.GetBuffer()[i + 2];
+                            byte A = paintData.GetBuffer()[i + 3];
+                            
+                            paintData.GetBuffer()[i] = A;
+                            paintData.GetBuffer()[i + 1] = R;
+                            paintData.GetBuffer()[i + 2] = G;
+                            paintData.GetBuffer()[i + 3] = B;
+                        }
+                        //piantData now contains the correct order bytes.
+
+                        //Now the masks
+                        //Bitmap maskImage = importFile.Clone(rect, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        Bitmap maskImage = new Bitmap(importFile.Width, importFile.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        BitmapData maskBits = maskImage.LockBits(rect, ImageLockMode.ReadWrite, maskImage.PixelFormat);
+                        IntPtr ptr2 = maskBits.Scan0;
+                        int bytes2 = Math.Abs(maskBits.Stride) * importFile.Height;
+                        System.Runtime.InteropServices.Marshal.Copy(ptr2, maskData.GetBuffer(), 0, bytes2);
+                        maskImage.UnlockBits(maskBits);
+
+                        for (int i = 0; i < paintData.Length/4; i++)
+                        {
+                            byte A = paintData.GetBuffer()[i*4];
+                            byte R = paintData.GetBuffer()[i*4 + 1];
+                            byte G = paintData.GetBuffer()[i*4 + 2];
+                            byte B = paintData.GetBuffer()[i*4 + 3];
+
+                            byte rgb = (byte)(R + G + B);
+                            maskData.GetBuffer()[i*3] = 0;//Since we have no metallic data to go off of, set it to 0
+                            maskData.GetBuffer()[i*3 + 1] = rgb > 0? (byte)12 : (byte)0;//Smoothness: anywhere there is paint is 12
+                            maskData.GetBuffer()[i*3 + 2] = 0;//unknown value so just set to 0
+                            
+                        }
+                        //Now we have our Paint_Mask
+
+                        //Make our streams for compression
+                        MemoryStream compressedPaint = new MemoryStream();
+                        MemoryStream compressedMask = new MemoryStream();
+                        maskData.Position = 0;
+                        paintData.Position = 0;
+                        GZip.Compress(paintData, compressedPaint, false);
+                        GZip.Compress(maskData, compressedMask, false);
+
+                        DateTime dt = DateTime.Now;
+                        string date = dt.ToString("yyyy-MM-dd_HH-mm-ss-tt");
+                        compressedMask.Position = 0;
+                        compressedPaint.Position = 0;
+                        /*
+                        using (FileStream file = new FileStream("Paint.ape", FileMode.Create, System.IO.FileAccess.Write))
+                            compressedPaint.CopyTo(file);
+                        using (FileStream file = new FileStream("Paint_Mask.ape", FileMode.Create, System.IO.FileAccess.Write))
+                            compressedMask.CopyTo(file);
+                            */
+                        
+                        dialog.ShowDialog();
+                        string savePath = @"\Internal shared storage\Android\data\com.infectiousape.kingspray\files\" + dialog.Path + "\\"+date;
+                        try
+                        {
+                            using (var device = devices.First(d => d.Description == "Quest"))
+                            {
+                                device.Connect();
+                                if (!device.DirectoryExists(@"\Internal shared storage\Android\data\com.infectiousape.kingspray\files\" + dialog.Path))
+                                    device.CreateDirectory(@"\Internal shared storage\Android\data\com.infectiousape.kingspray\files\" + dialog.Path);
+                                device.CreateDirectory(savePath);
+                                device.UploadFile(compressedMask, savePath + @"\Paint_Mask.ape");
+                                device.UploadFile(compressedPaint, savePath + @"\Paint.ape");
+                                stream.Position = 0;
+                                device.UploadFile(stream, savePath + @"\Thumbnail.jpg");
+                                device.Disconnect();
+                            }
+                        } catch (Exception)
+                        {
+                            MessageBox.Show(@"Error saving to Quest.  Please make sure you have your quest connected and file permission granted.");
+                        }
+                    }
+
+                    else
+                    {
+                        MessageBox.Show("Invalid image dimensions for import.\nValid image sizes are:\n8192x1024\n4096x2048\n4096x512\n2048x2048\n2048x1024\n1024x1024\n1024x512\n\nYour Image Size:\n" + importFile.Width + "x" + importFile.Height, @"Invalid Image Size");
+                    }
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
         }
     }
 

@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Oculus_Kingspray_Exporter"
         mc:Ignorable="d"
-        Title="What scene is this from?" Height="261.65" Width="335.275">
+        Title="What scene is this for?" Height="304.892" Width="335.275">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
@@ -18,16 +19,17 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Button Content="Rooftops" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46"/>
-        <Button Content="Top Dog Auto Repair" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="1"/>
-        <Button Content="Subway" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="2"/>
-        <Button Content="Underpass" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="3"/>
-        <Button Content="Bullship Depot" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="4"/>
-        <Button Content="Bullship Storage" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="0" Grid.Column="1"/>
-        <Button Content="Top Dog Garage" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="1" Grid.Column="1"/>
-        <Button Content="Cinema" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="2" Grid.Column="1"/>
-        <Button Content="Spraycan" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="3" Grid.Column="1"/>
-        <Button Content="Baseball Cap" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="4" Grid.Column="1"/>
+        <Button x:Name="btnRoof" Content="Rooftops" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="164" Height="46" IsEnabled="False" Click="BtnRoof_Click"/>
+        <Button x:Name="btnAutoRepair" Content="Top Dog Auto Repair" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="1" IsEnabled="False" Click="BtnAutoRepair_Click"/>
+        <Button x:Name="btnSubway" Content="Subway" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="2" IsEnabled="False" Click="BtnSubway_Click"/>
+        <Button x:Name="btnUnderpass" Content="Underpass" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="3" IsEnabled="False" Click="BtnUnderpass_Click"/>
+        <Button x:Name="btnDepot" Content="Bullship Depot" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="4" IsEnabled="False" Click="BtnDepot_Click"/>
+        <Button x:Name="btnStorage" Content="Bullship Storage" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="0" Grid.Column="1" IsEnabled="False" Click="BtnStorage_Click"/>
+        <Button x:Name="btnGarage" Content="Top Dog Garage" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="1" Grid.Column="1" IsEnabled="False" Click="BtnGarage_Click"/>
+        <Button x:Name="btnCinema" Content="Cinema" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="2" Grid.Column="1" IsEnabled="False" Click="BtnCinema_Click"/>
+        <Button x:Name="btnSpraycan" Content="Spraycan" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="3" Grid.Column="1" IsEnabled="False" Click="BtnSpraycan_Click"/>
+        <Button x:Name="btnBaseballCap" Content="Baseball Cap" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="4" Grid.Column="1" IsEnabled="False" Click="BtnBaseballCap_Click"/>
+        <Button x:Name="btnBunker" Content="Bunker" HorizontalAlignment="Center" VerticalAlignment="Center" Width="164" Height="46" Grid.Row="5" Grid.Column="0" IsEnabled="False" Click="BtnBunker_Click"/>
 
     </Grid>
 </Window>
