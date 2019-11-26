@@ -66,6 +66,9 @@
     <Compile Include="Scene Selection.xaml.cs">
       <DependentUpon>Scene Selection.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Thumbnail Selection.xaml.cs">
+      <DependentUpon>Thumbnail Selection.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -79,6 +82,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Scene Selection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Thumbnail Selection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

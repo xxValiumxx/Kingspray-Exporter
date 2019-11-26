@@ -83,8 +83,9 @@ namespace Oculus_Kingspray_Exporter
                         else { Console.Write("Missing thumbnail in " + thumbpath); }
                     }
                     lbThumbnails.ItemsSource = saveItems;
+                    lbThumbnails.SelectedIndex = 0;
                     device.Disconnect();
-                    /**/
+                    
                 }
                 
             }
@@ -117,6 +118,7 @@ namespace Oculus_Kingspray_Exporter
              */
             int height = 2048;//defaults so the compiler doesn't bitch
             int width = 2048;
+
             switch (saveItems[selectedThumbnail].SaveLocation)
             {
                 case "Rooftops":
@@ -273,6 +275,7 @@ namespace Oculus_Kingspray_Exporter
                     paintImage.Save(saveFileDialog.FileName.Split('.')[0] + "_Albedo" + ".png", System.Drawing.Imaging.ImageFormat.Png);
                     metalImage.Save(saveFileDialog.FileName.Split('.')[0] + "_Metallic" + ".png", System.Drawing.Imaging.ImageFormat.Png);
                     roughnessImage.Save(saveFileDialog.FileName.Split('.')[0] + "_Roughness" + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                    MessageBox.Show(@"Export Complete");
                 }
                 catch (Exception)
                 {
@@ -299,7 +302,8 @@ namespace Oculus_Kingspray_Exporter
             MemoryStream thumbnailStream = new MemoryStream((int)stream.Length);
             stream.CopyTo(thumbnailStream);
             Bitmap thumbnailOverlay = new Bitmap(stream);
-
+            Thumbnail_Selection ts = new Thumbnail_Selection();
+            ts.ShowDialog();
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = @"PNG Image | *.png";
             ofd.ShowDialog();
@@ -331,7 +335,7 @@ namespace Oculus_Kingspray_Exporter
                     0x400 bunker 2048*2048
                      */
                     bool isValidImport = true;
-                    bool isGarage = false;
+                    
                     UInt16 locationMask = 0x0;
                     Scene_Selection dialog = new Scene_Selection();
                     
@@ -419,6 +423,11 @@ namespace Oculus_Kingspray_Exporter
                     }
                     if(isValidImport)
                     {
+                        DateTime dt = DateTime.Now;
+                        string date = dt.ToString("yyyy-MM-dd_HH-mm-ss-tt");
+                        dialog.ShowDialog();
+                        string savePath = @"\Internal shared storage\Android\data\com.infectiousape.kingspray\files\" + dialog.Path + "\\" + date;
+
                         byte[] paintBuffer = new byte[importFile.Width * importFile.Height * 4];
                         byte[] maskBuffer = new byte[importFile.Width * importFile.Height * 3];
                         MemoryStream paintData = new MemoryStream(paintBuffer,0,paintBuffer.Length, true, true);
@@ -426,7 +435,7 @@ namespace Oculus_Kingspray_Exporter
 
                         //flip image along Y
                         importFile.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                        if (isGarage)
+                        if (dialog.Path == @"TopDogGarage")//stored flipped for some reason
                             importFile.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
                         System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, importFile.Width, importFile.Height);
@@ -484,8 +493,7 @@ namespace Oculus_Kingspray_Exporter
                         GZip.Compress(paintData, compressedPaint, false);
                         GZip.Compress(maskData, compressedMask, false);
 
-                        DateTime dt = DateTime.Now;
-                        string date = dt.ToString("yyyy-MM-dd_HH-mm-ss-tt");
+                        
                         compressedMask.Position = 0;
                         compressedPaint.Position = 0;
                         /*
@@ -495,8 +503,7 @@ namespace Oculus_Kingspray_Exporter
                             compressedMask.CopyTo(file);
                             */
                         
-                        dialog.ShowDialog();
-                        string savePath = @"\Internal shared storage\Android\data\com.infectiousape.kingspray\files\" + dialog.Path + "\\"+date;
+                        
                         try
                         {
                             using (var device = devices.First(d => d.Description == "Quest"))
@@ -508,8 +515,12 @@ namespace Oculus_Kingspray_Exporter
                                 device.UploadFile(compressedMask, savePath + @"\Paint_Mask.ape");
                                 device.UploadFile(compressedPaint, savePath + @"\Paint.ape");
                                 stream.Position = 0;
-                                device.UploadFile(stream, savePath + @"\Thumbnail.jpg");
+                                if(ts.customThumb)
+                                    device.UploadFile(ts.thumbPath, savePath + @"\Thumbnail.jpg");
+                                else
+                                    device.UploadFile(stream, savePath + @"\Thumbnail.jpg");
                                 device.Disconnect();
+                                MessageBox.Show(@"Import Complete");
                             }
                         } catch (Exception)
                         {
